@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0b0b0f" />
   <meta name="theme-color" content="#0b0b0f" media="(prefers-color-scheme: dark)" />
-  <title>Tunnels VS Code – Lanceur</title>
+  <title>CodeTunnel</title>
   <link rel="manifest" href="./manifest.webmanifest" />
   
   <!-- iOS -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="VS Tunnels" />
+  <meta name="apple-mobile-web-app-title" content="CodeTunnel" />
   
   <!-- Android Chrome -->
   <meta name="mobile-web-app-capable" content="yes" />
@@ -23,19 +23,28 @@
     body.wco { padding-top: var(--titlebar-height); }
     body.wco header { position: fixed; left:0; right:0; top:0; }
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, sans-serif; background: #0b0b0f; color: #e6e6ea; }
-    header { display:flex; align-items:center; justify-content:space-between; padding: 10px 16px; border-bottom: 1px solid #1b1b22; position: sticky; top: 0; background: rgba(11,11,15,.9); backdrop-filter: blur(6px); min-height:40px; }
-    h1 { margin: 0; font-size: 16px; letter-spacing: .3px; display:flex; align-items:center; gap:8px; }
-    main { max-width: 900px; margin: 0 auto; padding: 20px; }
-    .actions { display:flex; gap:10px; }
-    button, input, select, textarea { font: inherit; background: #14141c; color: #fff; border: 1px solid #2a2a35; border-radius: 12px; padding: 10px 12px; }
+    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, sans-serif; background: #0b0b0f; color: #e6e6ea; padding-bottom: 40px; }
+    header { display:flex; align-items:center; justify-content:space-between; padding: 12px 16px; border-bottom: 1px solid #1b1b22; position: sticky; top: 0; background: rgba(11,11,15,.95); backdrop-filter: blur(8px); min-height:48px; z-index:10; }
+    h1 { margin: 0; font-size: 18px; font-weight: 600; letter-spacing: .3px; display:flex; align-items:center; gap:8px; }
+    main { max-width: 900px; margin: 0 auto; padding: 16px; }
+    .actions { display:flex; gap:8px; flex-wrap:wrap; }
+    button, input, select, textarea { font: inherit; background: #14141c; color: #fff; border: 1px solid #2a2a35; border-radius: 10px; padding: 8px 12px; font-size: 14px; }
+    button { display:inline-flex; align-items:center; gap:6px; white-space:nowrap; }
+    button svg { width:16px; height:16px; flex-shrink:0; }
     button { background: #2563eb; border-color: #2563eb; cursor: pointer; }
     button.ghost { background: #14141c; border-color:#2a2a35; }
-    .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
-    .card { padding: 14px; border-radius: 16px; background: #111118; border: 1px solid #1c1c27; display:flex; flex-direction:column; gap: 10px; }
-    .card h3 { margin: 0; font-size: 16px; }
-    .muted { color: #9aa0a6; font-size: 12px; }
-    .row { display:flex; gap:10px; align-items:center; flex-wrap: wrap; }
+    .grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
+    .card { padding: 16px; border-radius: 14px; background: #111118; border: 1px solid #1c1c27; display:flex; flex-direction:column; gap: 12px; }
+    .card h3 { margin: 0; font-size: 17px; font-weight: 600; }
+    .muted { color: #9aa0a6; font-size: 13px; }
+    .row { display:flex; gap:8px; align-items:center; flex-wrap: wrap; }
+    .row button { font-size: 13px; padding: 7px 10px; }
+    @media (max-width: 640px) { 
+      header { flex-direction: column; gap: 10px; align-items: stretch; }
+      .actions { justify-content: center; }
+      button { flex: 1; min-width: 0; justify-content: center; }
+    }
     .field { display:flex; flex-direction:column; gap:6px; }
     label { font-size: 12px; color:#aab; }
     .danger { color:#ff6b6b; border-color:#ff6b6b !important; background:#281a1a !important; }
@@ -49,14 +58,32 @@
 </head>
 <body>
   <header>
-    <h1>Projets <span class="muted" style="font-weight:normal; font-size:12px;">v1.0.3</span></h1>
+    <h1>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:24px;height:24px">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      CodeTunnel <span class="muted" style="font-weight:400; font-size:11px;">v1.0.3</span>
+    </h1>
     <div class="actions">
-      <button class="ghost" id="btnExport">Export</button>
-      <button id="btnImport" class="ghost">Import</button>
+      <button class="ghost" id="btnExport">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export
+      </button>
+      <button id="btnImport" class="ghost">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Import
+      </button>
       <input type="file" id="importFile" accept="application/json" hidden />
-      <button id="btnAdd">Nouveau projet</button>
-      <select id="selVsProject" style="max-width:180px;"></select>
-      <button id="btnVsPwa" class="ghost">VS Code PWA</button>
+      <button id="btnAdd">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        Nouveau
+      </button>
+      <select id="selVsProject" style="max-width:160px; display:none;"></select>
+      <button id="btnVsPwa" class="ghost" style="display:none;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        Ouvrir (PWA)
+      </button>
     </div>
   </header>
 
@@ -138,16 +165,30 @@
           <div class="muted">Tunnel: <b>${escapeHtml(p.tunnel)}</b></div>
           <div class="muted">Dossier: <code>${escapeHtml(p.path)}</code></div>
           <div class="row">
-            <button data-act="open">Ouvrir</button>
-            <button class="ghost" data-act="edit">Modifier</button>
-            <button class="ghost danger" data-act="del">Supprimer</button>
+            <button data-act="open">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              Ouvrir
+            </button>
+            <button class="ghost" data-act="open-pwa">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              PWA
+            </button>
+            <button class="ghost" data-act="edit">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Éditer
+            </button>
+            <button class="ghost danger" data-act="del">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              Suppr
+            </button>
           </div>
-          <div class="hint">Lien: <a class="link" href="${url}">${url}</a></div>
+          <div class="hint" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Lien: <a class="link" href="${url}">${url}</a></div>
         `;
         card.onclick = (e) => {
-          const act = e.target.getAttribute('data-act');
+          const act = e.target.closest('button')?.getAttribute('data-act');
           if (!act) return;
           if (act === 'open') openTunnel(url);
+          if (act === 'open-pwa') openTunnelInPwa(url);
           if (act === 'edit') edit(idx);
           if (act === 'del') del(idx);
         };
@@ -156,6 +197,9 @@
     }
     function openTunnel(url) {
       window.location.replace(url);
+    }
+    function openTunnelInPwa(url) {
+      window.open(url, '_blank', 'noopener');
     }
 
     function edit(i) {

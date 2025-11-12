@@ -1,6 +1,6 @@
 {
-  "name": "VS Code Tunnels",
-  "short_name": "VS Tunnels",
+  "name": "CodeTunnel",
+  "short_name": "CodeTunnel",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
