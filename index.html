@@ -24,9 +24,9 @@
     body.wco header { position: fixed; left:0; right:0; top:0; }
     * { box-sizing: border-box; }
     body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, sans-serif; background: #0b0b0f; color: #e6e6ea; padding-bottom: 40px; }
-    header { display:flex; align-items:center; justify-content:space-between; padding: 12px 16px; border-bottom: 1px solid #1b1b22; position: sticky; top: 0; background: rgba(11,11,15,.95); backdrop-filter: blur(8px); min-height:48px; z-index:10; }
+    header { display:flex; align-items:center; justify-content:space-between; padding: 12px 16px; border-bottom: 1px solid #1b1b22; position: sticky; top: 0; background: #0b0b0f; backdrop-filter: blur(8px); min-height:48px; z-index:100; }
     h1 { margin: 0; font-size: 18px; font-weight: 600; letter-spacing: .3px; display:flex; align-items:center; gap:8px; }
-    main { max-width: 900px; margin: 0 auto; padding: 16px; }
+    main { max-width: 900px; margin: 0 auto; padding: 16px; padding-top: 20px; }
     .actions { display:flex; gap:8px; flex-wrap:wrap; }
     button, input, select, textarea { font: inherit; background: #14141c; color: #fff; border: 1px solid #2a2a35; border-radius: 10px; padding: 8px 12px; font-size: 14px; }
     button { display:inline-flex; align-items:center; gap:6px; white-space:nowrap; }
@@ -79,11 +79,6 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
         Nouveau
       </button>
-      <select id="selVsProject" style="max-width:160px; display:none;"></select>
-      <button id="btnVsPwa" class="ghost" style="display:none;">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-        Ouvrir (PWA)
-      </button>
     </div>
   </header>
 
@@ -133,7 +128,7 @@
     const KEY = 'vscode_tunnel_projects_v1';
     const $ = (q, root=document) => root.querySelector(q);
     function load() { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { return []; } }
-    function save(items) { localStorage.setItem(KEY, JSON.stringify(items)); render(); updateVsSelect(); }
+    function save(items) { localStorage.setItem(KEY, JSON.stringify(items)); render(); }
     function buildUrl(p) {
       const cleanPath = p.path.trim().replace(/\\/g,'/');
       const base = `https://vscode.dev/tunnel/${encodeURIComponent(p.tunnel)}/${cleanPath}`;
@@ -255,7 +250,6 @@
     }
 
     // Détection potentielle de la PWA vscode.dev (expérimental / peut ne rien retourner)
-    const btnVs = document.getElementById('btnVsPwa');
     const HINT_ID = 'vsHint';
     function showHint(text) {
       let hint = document.getElementById(HINT_ID);
@@ -268,52 +262,24 @@
       hint.textContent = text;
     }
 
-    function updateVsSelect() {
-      const sel = document.getElementById('selVsProject');
-      if (!sel) return;
-      const items = load();
-      sel.innerHTML = '';
-      if (!items.length) { sel.style.display='none'; return; }
-      items.forEach((p,i)=>{
-        const opt = document.createElement('option');
-        opt.value = i;
-        opt.textContent = p.name;
-        sel.appendChild(opt);
-      });
-      sel.style.display='inline-block';
-    }
-
     async function detectVsCodePwa() {
       if (!('getInstalledRelatedApps' in navigator)) {
         showHint("Astuce: installez aussi vscode.dev comme PWA (menu navigateur) pour un lancement plus immersif.");
-        return false;
+        return;
       }
       try {
         const apps = await navigator.getInstalledRelatedApps();
         const found = apps.some(a => (a.url || '').includes('vscode.dev'));
         showHint(found
-          ? "VS Code PWA détectée: utilisez le bouton pour ouvrir le projet sélectionné."
+          ? "VS Code PWA détectée: utilisez le bouton 'PWA' pour ouvrir directement."
           : "VS Code PWA non détectée. Ouvrez https://vscode.dev puis 'Installer l'application'.");
-        return found;
       } catch {
         showHint("Détection VS Code PWA indisponible. Vous pouvez l'installer via https://vscode.dev.");
-        return false;
       }
     }
 
-    btnVs.addEventListener('click', () => {
-      const sel = document.getElementById('selVsProject');
-      const items = load();
-      if (!items.length) return;
-      const idx = sel && sel.value ? parseInt(sel.value,10) : 0;
-      const proj = items[idx] || items[0];
-      const url = buildUrl(proj);
-      window.open(url, '_blank', 'noopener');
-    });
-
     detectVsCodePwa();
     render();
-    updateVsSelect();
   </script>
 </body>
 </html>
