@@ -140,7 +140,7 @@
         card.onclick = (e) => {
           const act = e.target.getAttribute('data-act');
           if (!act) return;
-          if (act === 'open') location.href = url;
+          if (act === 'open') window.location.replace(url);
           if (act === 'edit') edit(idx);
           if (act === 'del') del(idx);
         };
