@@ -45,7 +45,7 @@
 </head>
 <body>
   <header>
-    <h1>VS Code Tunnels — Mes projets</h1>
+    <h1>Projets <span class="muted" style="font-weight:normal; font-size:12px;">v1.0.1</span></h1>
     <div class="actions">
       <button class="ghost" id="btnExport">Export</button>
       <button id="btnImport" class="ghost">Import</button>
@@ -104,8 +104,10 @@
     function buildUrl(p) {
       const cleanPath = p.path.trim().replace(/\\/g,'/');
       const base = `https://vscode.dev/tunnel/${encodeURIComponent(p.tunnel)}/${cleanPath}`;
-      const lang = p.lang ? `?vscode-lang=${encodeURIComponent(p.lang)}` : '';
-      return base + lang;
+      const params = new URLSearchParams();
+      if (p.lang) params.set('vscode-lang', p.lang);
+      params.set('embedType', 'iframe');
+      return base + '?' + params.toString();
     }
     function escapeHtml(s) { return (s+'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
