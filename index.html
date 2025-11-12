@@ -153,11 +153,7 @@
       });
     }
     function openTunnel(url) {
-      const fsPref = localStorage.getItem('pref_fullscreen') === '1';
-      const go = () => { window.location.replace(url); };
-      if (fsPref && document.documentElement.requestFullscreen) {
-        document.documentElement.requestFullscreen().catch(()=>{}).finally(go);
-      } else go();
+      window.location.replace(url);
     }
 
     function edit(i) {
@@ -211,16 +207,6 @@
       navigator.windowControlsOverlay.addEventListener('geometrychange', applyGeom);
       applyGeom();
     }
-
-    // UI préférences
-    const headerActions = document.querySelector('.actions');
-    const fsToggle = document.createElement('label');
-    fsToggle.style.display='flex'; fsToggle.style.alignItems='center'; fsToggle.style.gap='4px'; fsToggle.style.fontSize='12px';
-    fsToggle.innerHTML = '<input type="checkbox" id="chkFs" style="margin:0" /> Plein écran à l\'ouverture';
-    headerActions.appendChild(fsToggle);
-    const chkFs = document.getElementById('chkFs');
-    chkFs.checked = localStorage.getItem('pref_fullscreen') === '1';
-    chkFs.onchange = () => localStorage.setItem('pref_fullscreen', chkFs.checked ? '1':'0');
 
     render();
   </script>
