@@ -1,52 +1,189 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#111111">
-  <title>VS Code Tunnel Launcher</title>
-  <link rel="manifest" href="manifest.webmanifest">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="apple-touch-icon" href="assets/icon-192.png">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0b0f" />
+  <title>Tunnels VS Code – Lanceur</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="apple-touch-icon" href="assets/icon-192.png" />
   <style>
     :root { color-scheme: dark; }
-    body { margin:0; min-height:100dvh; display:grid; place-items:center; background:#111; color:#eaeaea; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',sans-serif }
-    .box { max-width:680px; padding:24px; text-align:center }
-    input,button { font:inherit; padding:.8rem 1rem; border-radius:10px; border:1px solid #333; background:#1b1b1b; color:#fff; width:100%; }
-    button { background:#2563eb; border-color:#2563eb; cursor:pointer; }
-    small { opacity:.7 }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, sans-serif; background: #0b0b0f; color: #e6e6ea; }
+    header { display:flex; align-items:center; justify-content:space-between; padding: 16px 20px; border-bottom: 1px solid #1b1b22; position: sticky; top: 0; background: rgba(11,11,15,.9); backdrop-filter: blur(6px); }
+    h1 { margin: 0; font-size: 18px; letter-spacing: .3px; }
+    main { max-width: 900px; margin: 0 auto; padding: 20px; }
+    .actions { display:flex; gap:10px; }
+    button, input, select, textarea { font: inherit; background: #14141c; color: #fff; border: 1px solid #2a2a35; border-radius: 12px; padding: 10px 12px; }
+    button { background: #2563eb; border-color: #2563eb; cursor: pointer; }
+    button.ghost { background: #14141c; border-color:#2a2a35; }
+    .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+    .card { padding: 14px; border-radius: 16px; background: #111118; border: 1px solid #1c1c27; display:flex; flex-direction:column; gap: 10px; }
+    .card h3 { margin: 0; font-size: 16px; }
+    .muted { color: #9aa0a6; font-size: 12px; }
+    .row { display:flex; gap:10px; align-items:center; flex-wrap: wrap; }
+    .field { display:flex; flex-direction:column; gap:6px; }
+    label { font-size: 12px; color:#aab; }
+    .danger { color:#ff6b6b; border-color:#ff6b6b !important; background:#281a1a !important; }
+    dialog { background:#0f0f16; color:#fff; border:1px solid #242433; border-radius:16px; padding:16px; max-width:680px; width:calc(100% - 24px); }
+    dialog::backdrop { background: rgba(0,0,0,.5); }
+    .footer { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:12px; }
+    .hint { font-size:12px; color:#9aa0a6; }
+    .empty { padding: 40px 10px; text-align: center; border:1px dashed #26263a; border-radius:16px; }
+    a.link { color:#8ab4ff; text-decoration:none; }
   </style>
 </head>
 <body>
-  <div class="box">
-    <h1>VS Code Tunnel Launcher</h1>
-    <p>Redirection vers votre tunnel…</p>
-    <p><small>Si la redirection ne démarre pas, remplissez l’URL ci‑dessous.</small></p>
-    <form id="f">
-      <input id="u" placeholder="https://vscode.dev/tunnel/…/…?…" autocomplete="off">
-      <div style="height:.6rem"></div>
-      <button type="submit">Ouvrir le tunnel</button>
+  <header>
+    <h1>VS Code Tunnels — Mes projets</h1>
+    <div class="actions">
+      <button class="ghost" id="btnExport">Export</button>
+      <button id="btnImport" class="ghost">Import</button>
+      <input type="file" id="importFile" accept="application/json" hidden />
+      <button id="btnAdd">Nouveau projet</button>
+    </div>
+  </header>
+
+  <main>
+    <div id="list"></div>
+  </main>
+
+  <dialog id="dlg">
+    <form id="form" method="dialog">
+      <h3 id="dlgTitle">Nouveau projet</h3>
+      <div class="grid" style="margin-top:8px">
+        <div class="field">
+          <label for="name">Nom de l’application</label>
+          <input id="name" placeholder="Ex. Microcap AI" required />
+        </div>
+        <div class="field">
+          <label for="tunnel">Nom du tunnel</label>
+          <input id="tunnel" placeholder="Ex. fifi85" required />
+        </div>
+        <div class="field" style="grid-column: 1 / -1">
+          <label for="path">Dossier à ouvrir</label>
+          <input id="path" placeholder="Ex. d:/philippe/chatgpt-microcap-ai" required />
+        </div>
+        <div class="field">
+          <label for="lang">Langue (facultatif)</label>
+          <select id="lang">
+            <option value="">Par défaut</option>
+            <option value="fr-fr">fr-fr</option>
+            <option value="en">en</option>
+          </select>
+        </div>
+      </div>
+      <div class="footer">
+        <span class="hint">Rien n’est envoyé en ligne — tout est stocké dans <b>localStorage</b>.</span>
+        <div class="row">
+          <button class="ghost" value="cancel">Annuler</button>
+          <button id="btnSave" value="default">Enregistrer</button>
+        </div>
+      </div>
+      <input type="hidden" id="editId" />
     </form>
-    <p><small>Astuce : enregistrez cette page sur l’écran d’accueil pour l’ouvrir en plein écran.</small></p>
-  </div>
+  </dialog>
+
   <script>
     if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
-    const LS_KEY = 'vscode_tunnel_url';
-    function getStored() { try { return localStorage.getItem(LS_KEY); } catch { return null; } }
-    function setStored(v) { try { localStorage.setItem(LS_KEY,v); } catch {} }
-    const params = new URLSearchParams(location.search);
-    const target = params.get('target') || getStored() || "https://vscode.dev/tunnel/fifi85/d:/philippe/chatgpt-microcap-ai?vscode-lang=fr-fr";
-    const input = document.getElementById('u');
-    input.value = target || "";
-    setTimeout(() => { if (target) { setStored(target); location.replace(target); } }, 100);
-    document.getElementById('f').addEventListener('submit', (e) => {
+
+    const KEY = 'vscode_tunnel_projects_v1';
+
+    const $ = (q, root=document) => root.querySelector(q);
+    function load() { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { return []; } }
+    function save(items) { localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+    function buildUrl(p) {
+      const cleanPath = p.path.trim().replace(/\\/g,'/');
+      const base = `https://vscode.dev/tunnel/${encodeURIComponent(p.tunnel)}/${cleanPath}`;
+      const lang = p.lang ? `?vscode-lang=${encodeURIComponent(p.lang)}` : '';
+      return base + lang;
+    }
+    function escapeHtml(s) { return (s+'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+    function render() {
+      const items = load();
+      const root = $('#list');
+      if (!items.length) {
+        root.innerHTML = `<div class="empty">
+          <p>Aucun projet configuré.</p>
+          <p><button id="addFirst">Créer un projet</button></p>
+        </div>`;
+        $('#addFirst').onclick = () => $('#btnAdd').click();
+        return;
+      }
+      root.innerHTML = '<div class="grid"></div>';
+      const grid = root.querySelector('.grid');
+      items.forEach((p, idx) => {
+        const url = buildUrl(p);
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <h3>${escapeHtml(p.name)}</h3>
+          <div class="muted">Tunnel: <b>${escapeHtml(p.tunnel)}</b></div>
+          <div class="muted">Dossier: <code>${escapeHtml(p.path)}</code></div>
+          <div class="row">
+            <button data-act="open">Ouvrir</button>
+            <button class="ghost" data-act="edit">Modifier</button>
+            <button class="ghost danger" data-act="del">Supprimer</button>
+          </div>
+          <div class="hint">Lien: <a class="link" href="${url}">${url}</a></div>
+        `;
+        card.onclick = (e) => {
+          const act = e.target.getAttribute('data-act');
+          if (!act) return;
+          if (act === 'open') location.href = url;
+          if (act === 'edit') edit(idx);
+          if (act === 'del') del(idx);
+        };
+        grid.appendChild(card);
+      });
+    }
+
+    function edit(i) {
+      const p = load()[i];
+      $('#editId').value = i;
+      $('#name').value = p.name;
+      $('#tunnel').value = p.tunnel;
+      $('#path').value = p.path;
+      $('#lang').value = p.lang || "";
+      $('#dlgTitle').textContent = 'Modifier le projet';
+      $('#dlg').showModal();
+    }
+    function del(i) {
+      const items = load();
+      if (!confirm(`Supprimer « ${items[i].name} » ?`)) return;
+      items.splice(i,1); save(items);
+    }
+
+    $('#btnAdd').onclick = () => { $('#editId').value=''; $('#form').reset(); $('#dlgTitle').textContent='Nouveau projet'; $('#dlg').showModal(); };
+    $('#btnSave').onclick = (e) => {
       e.preventDefault();
-      const url = input.value.trim();
-      if (!url) return;
-      setStored(url);
-      location.href = url;
-    });
+      const name = $('#name').value.trim();
+      const tunnel = $('#tunnel').value.trim();
+      const path = $('#path').value.trim();
+      const lang = $('#lang').value;
+      if (!name || !tunnel || !path) return;
+      const items = load();
+      const id = $('#editId').value;
+      const proj = { name, tunnel, path, lang };
+      if (id === '') items.push(proj); else items[+id] = proj; save(items);
+      $('#dlg').close();
+    };
+    $('#btnExport').onclick = () => {
+      const blob = new Blob([JSON.stringify(load(), null, 2)], {type:'application/json'});
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'vscode-tunnels-projects.json'; a.click(); URL.revokeObjectURL(a.href);
+    };
+    $('#btnImport').onclick = () => document.getElementById('importFile').click();
+    document.getElementById('importFile').onchange = async (e) => {
+      const f = e.target.files[0]; if (!f) return;
+      try { const items = JSON.parse(await f.text()); if (Array.isArray(items)) save(items); } catch { alert('Fichier invalide'); }
+      e.target.value = '';
+    };
+
+    render();
   </script>
 </body>
 </html>

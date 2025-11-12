@@ -1,11 +1,11 @@
 {
-  "name": "VS Code Tunnel",
-  "short_name": "Tunnel VSCode",
+  "name": "VS Code Tunnels",
+  "short_name": "VS Tunnels",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#111111",
-  "theme_color": "#111111",
+  "background_color": "#0b0b0f",
+  "theme_color": "#0b0b0f",
   "icons": [
     {
       "src": "assets/icon-192.png",
