@@ -55,6 +55,7 @@
       <button id="btnImport" class="ghost">Import</button>
       <input type="file" id="importFile" accept="application/json" hidden />
       <button id="btnAdd">Nouveau projet</button>
+      <button id="btnVsPwa" class="ghost" style="display:none">Ouvrir dans VS Code PWA</button>
     </div>
   </header>
 
@@ -207,6 +208,51 @@
       navigator.windowControlsOverlay.addEventListener('geometrychange', applyGeom);
       applyGeom();
     }
+
+    // Détection potentielle de la PWA vscode.dev (expérimental / peut ne rien retourner)
+    const btnVs = document.getElementById('btnVsPwa');
+    const HINT_ID = 'vsHint';
+    function showHint(text) {
+      let hint = document.getElementById(HINT_ID);
+      if (!hint) {
+        hint = document.createElement('div');
+        hint.id = HINT_ID;
+        hint.className = 'hint';
+        document.querySelector('main').prepend(hint);
+      }
+      hint.textContent = text;
+    }
+
+    async function detectVsCodePwa() {
+      if (!('getInstalledRelatedApps' in navigator)) {
+        showHint("Astuce: installez aussi vscode.dev comme PWA pour réduire l'en-tête. Ouvrez https://vscode.dev puis 'Installer'.");
+        return false;
+      }
+      try {
+        const apps = await navigator.getInstalledRelatedApps();
+        const found = apps.some(a => (a.url || '').includes('vscode.dev'));
+        if (found) {
+          btnVs.style.display = 'inline-block';
+          showHint("VS Code PWA détectée: ce bouton ouvrira votre tunnel dans son contexte.");
+        } else {
+          showHint("VS Code PWA non détectée. Ouvrez https://vscode.dev et installez-la (menu navigateur) pour un meilleur rendu.");
+        }
+        return found;
+      } catch {
+        showHint("Impossible de détecter la PWA VS Code (API indisponible). Vous pouvez l'installer depuis https://vscode.dev.");
+        return false;
+      }
+    }
+
+    btnVs.addEventListener('click', () => {
+      // Ouvre dans nouvelle fenêtre: si l'app est installée, certains navigateurs peuvent router vers le contexte PWA
+      const first = load()[0];
+      if (!first) return;
+      const url = buildUrl(first); // On pourrait améliorer: menu de sélection, mais simple pour MVP
+      window.open(url, '_blank', 'noopener');
+    });
+
+    detectVsCodePwa();
 
     render();
   </script>
