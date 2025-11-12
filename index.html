@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#111111">
+  <title>VS Code Tunnel Launcher</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="assets/icon-192.png">
+  <style>
+    :root { color-scheme: dark; }
+    body { margin:0; min-height:100dvh; display:grid; place-items:center; background:#111; color:#eaeaea; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',sans-serif }
+    .box { max-width:680px; padding:24px; text-align:center }
+    input,button { font:inherit; padding:.8rem 1rem; border-radius:10px; border:1px solid #333; background:#1b1b1b; color:#fff; width:100%; }
+    button { background:#2563eb; border-color:#2563eb; cursor:pointer; }
+    small { opacity:.7 }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>VS Code Tunnel Launcher</h1>
+    <p>Redirection vers votre tunnel…</p>
+    <p><small>Si la redirection ne démarre pas, remplissez l’URL ci‑dessous.</small></p>
+    <form id="f">
+      <input id="u" placeholder="https://vscode.dev/tunnel/…/…?…" autocomplete="off">
+      <div style="height:.6rem"></div>
+      <button type="submit">Ouvrir le tunnel</button>
+    </form>
+    <p><small>Astuce : enregistrez cette page sur l’écran d’accueil pour l’ouvrir en plein écran.</small></p>
+  </div>
+  <script>
+    if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
+    const LS_KEY = 'vscode_tunnel_url';
+    function getStored() { try { return localStorage.getItem(LS_KEY); } catch { return null; } }
+    function setStored(v) { try { localStorage.setItem(LS_KEY,v); } catch {} }
+    const params = new URLSearchParams(location.search);
+    const target = params.get('target') || getStored() || "https://vscode.dev/tunnel/fifi85/d:/philippe/chatgpt-microcap-ai?vscode-lang=fr-fr";
+    const input = document.getElementById('u');
+    input.value = target || "";
+    setTimeout(() => { if (target) { setStored(target); location.replace(target); } }, 100);
+    document.getElementById('f').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const url = input.value.trim();
+      if (!url) return;
+      setStored(url);
+      location.href = url;
+    });
+  </script>
+</body>
+</html>
