@@ -49,13 +49,14 @@
 </head>
 <body>
   <header>
-    <h1>Projets <span class="muted" style="font-weight:normal; font-size:12px;">v1.0.1</span></h1>
+    <h1>Projets <span class="muted" style="font-weight:normal; font-size:12px;">v1.0.2</span></h1>
     <div class="actions">
       <button class="ghost" id="btnExport">Export</button>
       <button id="btnImport" class="ghost">Import</button>
       <input type="file" id="importFile" accept="application/json" hidden />
       <button id="btnAdd">Nouveau projet</button>
-      <button id="btnVsPwa" class="ghost" style="display:none">Ouvrir dans VS Code PWA</button>
+      <select id="selVsProject" style="display:none; max-width:180px;"></select>
+      <button id="btnVsPwa" class="ghost" style="display:none">VS Code PWA</button>
     </div>
   </header>
 
@@ -105,7 +106,7 @@
     const KEY = 'vscode_tunnel_projects_v1';
     const $ = (q, root=document) => root.querySelector(q);
     function load() { try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { return []; } }
-    function save(items) { localStorage.setItem(KEY, JSON.stringify(items)); render(); }
+    function save(items) { localStorage.setItem(KEY, JSON.stringify(items)); render(); updateVsSelect(); }
     function buildUrl(p) {
       const cleanPath = p.path.trim().replace(/\\/g,'/');
       const base = `https://vscode.dev/tunnel/${encodeURIComponent(p.tunnel)}/${cleanPath}`;
@@ -223,6 +224,21 @@
       hint.textContent = text;
     }
 
+    function updateVsSelect() {
+      const sel = document.getElementById('selVsProject');
+      if (!sel) return;
+      const items = load();
+      sel.innerHTML = '';
+      if (!items.length) { sel.style.display='none'; return; }
+      items.forEach((p,i)=>{
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = p.name;
+        sel.appendChild(opt);
+      });
+      if (document.getElementById('btnVsPwa').style.display !== 'none') sel.style.display='inline-block';
+    }
+
     async function detectVsCodePwa() {
       if (!('getInstalledRelatedApps' in navigator)) {
         showHint("Astuce: installez aussi vscode.dev comme PWA pour réduire l'en-tête. Ouvrez https://vscode.dev puis 'Installer'.");
@@ -233,6 +249,7 @@
         const found = apps.some(a => (a.url || '').includes('vscode.dev'));
         if (found) {
           btnVs.style.display = 'inline-block';
+          updateVsSelect();
           showHint("VS Code PWA détectée: ce bouton ouvrira votre tunnel dans son contexte.");
         } else {
           showHint("VS Code PWA non détectée. Ouvrez https://vscode.dev et installez-la (menu navigateur) pour un meilleur rendu.");
@@ -245,16 +262,18 @@
     }
 
     btnVs.addEventListener('click', () => {
-      // Ouvre dans nouvelle fenêtre: si l'app est installée, certains navigateurs peuvent router vers le contexte PWA
-      const first = load()[0];
-      if (!first) return;
-      const url = buildUrl(first); // On pourrait améliorer: menu de sélection, mais simple pour MVP
+      const sel = document.getElementById('selVsProject');
+      const items = load();
+      if (!items.length) return;
+      const idx = sel && sel.value ? parseInt(sel.value,10) : 0;
+      const proj = items[idx] || items[0];
+      const url = buildUrl(proj);
       window.open(url, '_blank', 'noopener');
     });
 
     detectVsCodePwa();
-
     render();
+    updateVsSelect();
   </script>
 </body>
 </html>
