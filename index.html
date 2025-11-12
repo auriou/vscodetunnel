@@ -55,8 +55,8 @@
       <button id="btnImport" class="ghost">Import</button>
       <input type="file" id="importFile" accept="application/json" hidden />
       <button id="btnAdd">Nouveau projet</button>
-      <select id="selVsProject" style="display:none; max-width:180px;"></select>
-      <button id="btnVsPwa" class="ghost" style="display:none">VS Code PWA</button>
+      <select id="selVsProject" style="max-width:180px;"></select>
+      <button id="btnVsPwa" class="ghost">VS Code PWA</button>
     </div>
   </header>
 
@@ -236,27 +236,23 @@
         opt.textContent = p.name;
         sel.appendChild(opt);
       });
-      if (document.getElementById('btnVsPwa').style.display !== 'none') sel.style.display='inline-block';
+      sel.style.display='inline-block';
     }
 
     async function detectVsCodePwa() {
       if (!('getInstalledRelatedApps' in navigator)) {
-        showHint("Astuce: installez aussi vscode.dev comme PWA pour réduire l'en-tête. Ouvrez https://vscode.dev puis 'Installer'.");
+        showHint("Astuce: installez aussi vscode.dev comme PWA (menu navigateur) pour un lancement plus immersif.");
         return false;
       }
       try {
         const apps = await navigator.getInstalledRelatedApps();
         const found = apps.some(a => (a.url || '').includes('vscode.dev'));
-        if (found) {
-          btnVs.style.display = 'inline-block';
-          updateVsSelect();
-          showHint("VS Code PWA détectée: ce bouton ouvrira votre tunnel dans son contexte.");
-        } else {
-          showHint("VS Code PWA non détectée. Ouvrez https://vscode.dev et installez-la (menu navigateur) pour un meilleur rendu.");
-        }
+        showHint(found
+          ? "VS Code PWA détectée: utilisez le bouton pour ouvrir le projet sélectionné."
+          : "VS Code PWA non détectée. Ouvrez https://vscode.dev puis 'Installer l'application'.");
         return found;
       } catch {
-        showHint("Impossible de détecter la PWA VS Code (API indisponible). Vous pouvez l'installer depuis https://vscode.dev.");
+        showHint("Détection VS Code PWA indisponible. Vous pouvez l'installer via https://vscode.dev.");
         return false;
       }
     }
